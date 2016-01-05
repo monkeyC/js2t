@@ -1,0 +1,19 @@
+{$message}
+<form action="{$url}/index.php?a=settings&b=security" method="post">
+<div class="page-inner">
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->ttl_password}</div>
+		<div class="page-input-content">
+			<input type="password" name="password" />
+			<div class="page-input-sub">{$lng->sub_password}</div>
+		</div>
+	</div>
+</div>
+<div class="divider"></div>
+<div class="page-inner">
+	<div class="page-input-title"></div>
+	<div class="page-input-content">
+		<input type="submit" value="{$lng->save_changes}" />
+	</div>
+</div>
+</form>

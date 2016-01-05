@@ -1,0 +1,35 @@
+{$message}
+<form action="{$url}/index.php?a=admin&b=social" method="post">
+<div class="page-inner">
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_fbapp}</div>
+		<div class="page-input-content">
+			<select name="fbapp">
+				<option value="0" {$fbappoff}>{$lng->off}</option>
+				<option value="1" {$fbappon}>{$lng->on}</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_fbapp}</div>
+		</div>
+	</div>
+	
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_fbappid}</div>
+		<div class="page-input-content">
+			<input type="text" name="fbappid" value="{$fbappid}" />
+			<div class="page-input-sub">{$lng->admin_sub_fbappid}</div>
+		</div>
+	</div>
+	
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_fbappsecret}</div>
+		<div class="page-input-content">
+			<input type="text" name="fbappsecret" value="{$fbappsecret}" />
+			<div class="page-input-sub">{$lng->admin_sub_fbappsecret}</div>
+		</div>
+	</div>
+</div>
+<div class="divider"></div>
+<div class="page-inner">
+	<div class="page-input-title"></div><input type="submit" value="{$lng->save_changes}" />
+</div>
+</form>

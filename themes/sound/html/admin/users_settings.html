@@ -1,0 +1,126 @@
+{$message}
+<form action="{$url}/index.php?a=admin&b=users_settings" method="post">
+<div class="page-inner">
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_wholiked}</div>
+		<div class="page-input-content">
+			<select name="lperpost">
+				<option value="0" {$likesoff}>{$lng->off}</option>
+				<option value="5" {$likeson}>{$lng->on}</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_wholiked}</div>
+		</div>
+	</div>
+	
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_ronline}</div>
+		<div class="page-input-content">
+			<select name="ronline">
+				<option value="3" {$uone}>4</option>
+				<option value="7" {$utwo}>8</option>
+				<option value="11" {$uthree}>12</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_ronline}</div>
+		</div>
+	</div>
+	
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_nperwidget}</div>
+		<div class="page-input-content">
+			<select name="nperwidget">
+				<option value="5" {$none}>5</option>
+				<option value="10" {$ntwo}>10</option>
+				<option value="20" {$nthree}>20</option>
+				<option value="30" {$nfour}>30</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_nperwidget}</div>
+		</div>
+	</div>
+</div>
+<div class="divider"></div>
+<div class="page-inner">
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_notificationl}</div>
+		<div class="page-input-content">
+			<select name="notificationl">
+				<option value="0" {$loff}>{$lng->off}</option>
+				<option value="1" {$lon}>{$lng->on}</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_notificationl}</div>
+		</div>
+	</div>
+	
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_notificationc}</div>
+		<div class="page-input-content">
+			<select name="notificationc">
+				<option value="0" {$coff}>{$lng->off}</option>
+				<option value="1" {$con}>{$lng->on}</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_notificationc}</div>
+		</div>
+	</div>
+	
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_notificationd}</div>
+		<div class="page-input-content">
+			<select name="notificationd">
+				<option value="0" {$doff}>{$lng->off}</option>
+				<option value="1" {$don}>{$lng->on}</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_notificationd}</div>
+		</div>
+	</div>
+	
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_notificationf}</div>
+		<div class="page-input-content">
+			<select name="notificationf">
+				<option value="0" {$foff}>{$lng->off}</option>
+				<option value="1" {$fon}>{$lng->on}</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_notificationf}</div>
+		</div>
+	</div>
+</div>
+<div class="divider"></div>
+<div class="page-inner">
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_email_comment}</div>
+		<div class="page-input-content">
+			<select name="email_comment">
+				<option value="0" {$ecoff}>{$lng->off}</option>
+				<option value="1" {$econ}>{$lng->on}</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_email_comment}</div>
+		</div>
+	</div>
+	
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_email_like}</div>
+		<div class="page-input-content">
+			<select name="email_like">
+				<option value="0" {$elff}>{$lng->off}</option>
+				<option value="1" {$elon}>{$lng->on}</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_email_like}</div>
+		</div>
+	</div>
+	
+	<div class="page-input-container">
+		<div class="page-input-title">{$lng->admin_ttl_email_new_friend}</div>
+		<div class="page-input-content">
+			<select name="email_new_friend">
+				<option value="0" {$enfoff}>{$lng->off}</option>
+				<option value="1" {$enfon}>{$lng->on}</option>
+			</select>
+			<div class="page-input-sub">{$lng->admin_sub_email_new_friend}</div>
+		</div>
+	</div>
+
+</div>
+<div class="divider"></div>
+<div class="page-inner">
+	<div class="page-input-title"></div><input type="submit" value="{$lng->save_changes}" />
+</div>
+</form>

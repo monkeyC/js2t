@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>{$title}</title>
+<link rel="shortcut icon" href="{$url}/favicon.ico" />
+<link href="{$url}/{$theme_path}/{$theme_name}/style.css" rel="stylesheet" type="text/css" />
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="description" content="{$meta_description}">
+<script type="text/javascript" src="{$url}/{$theme_url}/js/jquery.js"></script>
+<script type="text/javascript" src="{$url}/{$theme_url}/js/jquery.timeago.js"></script>
+<script type="text/javascript" src="{$url}/{$theme_url}/js/functions.js"></script>
+<script type="text/javascript" src="{$url}/{$theme_url}/js/jquery.jplayer.min.js"></script>
+<script type="text/javascript">
+$(function() {
+	$("body").on("click", "a[rel='loadpage']", function(e) {
+		// Get the link location that was clicked
+		
+		startLoadingBar();
+		pageurl = $(this).attr('href');
+		
+		// Replace the path of the url from index to the path with raw content
+		var custom = pageurl;
+		var custom = custom.replace('index', 'page');
+		
+		// Request the page
+		$.ajax({url:custom,success: function(data) {
+			// Show the content
+			$('#content').html(data);
+			// Stop the loading bar
+			stopLoadingBar();
+			// Set the new title tag
+			document.title = $('#page-title').html();
+			// Scroll the document at the top of the page
+			$(document).scrollTop(0);
+			// Reload functions
+			reload();
+		}});
+		
+		// Store the url to the last page accessed
+		if(pageurl != window.location){
+			window.history.pushState({path:pageurl}, '', pageurl);	
+		}
+		return false;
+	});
+});
+
+// Override the back button to get the ajax content via the back content */
+$(window).bind('popstate', function(ev) {
+	if (navigator.userAgent.match(/(iPad|iPhone|iPod|Android)/g) && !window.history.ready && !ev.originalEvent.state) {
+		return; // Work around for WebKit devices [prevent executing a popstate upon page load (The bug was fixed in Chrome 35+, but not on the mobile browser)]
+	}
+	if (navigator.userAgent.match(/AppleWebKit/) && !navigator.userAgent.match(/Chrome/) && !window.history.ready && !ev.originalEvent.state) {
+		return; // Work around for WebKit devices [prevent executing a popstate upon page load (The bug was fixed in Chrome 35+, but not on the mobile browser)]
+	}
+	
+	startLoadingBar();
+	// Replace the path of the url from index to the path with raw content
+	var custom = location.href;
+	
+	// Check whether the page contains index.php or not, if it doens't then add one (prevent breaking when loading website without index.php
+	if(custom.indexOf("index.php") == -1) {
+		var custom = location.href + '/index.php';
+	}
+	var custom = custom.replace('index', 'page');
+	
+	// Request the page
+	$.ajax({url:custom,success: function(data){
+		// Show the content
+		$('#content').html(data);
+		// Stop the loading bar
+		stopLoadingBar();
+		// Set the new title tag
+		document.title = $('#page-title').html();
+		// Scroll the document at the top of the page
+		$(document).scrollTop(0);
+		// Reload functions
+		reload();
+	}});
+});
+</script>
+<script type="text/javascript">
+$(document).ready(function() {
+	// Set the player volume
+	if(getCookie("volume") == "") {
+		player_volume = {$volume};
+		setCookie("volume", {$volume}, "365");
+	} else {
+		player_volume = getCookie("volume");
+	}
+	$("#sound-player").jPlayer({
+		ready: function (event) {
+			$(this).jPlayer("setMedia", {
+				
+			});
+		},
+		cssSelectorAncestor: '#sound-container',
+		swfPath: "{$url}/{$theme_url}/js",
+		supplied: "mp3",
+		wmode: "window",
+		volume: player_volume,
+		smoothPlayBar: true,
+		keyEnabled: true
+	});
+});
+function playSong(song, id) {
+	// If the user is on a mobile device, open the track in a new tab rather than playing it on the page
+	/*if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+		window.location = '{$url}/uploads/tracks/'+song;
+		return false;
+	}*/
+	
+	// Remove the current-song class (if any)
+	$('.current-song').removeClass('current-song');
+	// Show the previously hidden Play button (if any)
+	$('.current-play').show();
+	$('.current-play').removeClass('current-play');
+	
+	// Remove the active player if exist and set the ghost player
+	$('.current-seek').html($('#sound_ghost_player').html());
+	
+	// Remove the active player class
+	$('.current-seek').removeClass('current-seek');
+	
+	// Escape the ID (contains dots) http://api.jquery.com/category/selectors/
+	var parsedId = song.replace('.', '\\.');
+	
+	// Add the current song class
+	$('#track'+id).addClass('current-song');
+	// Add current play class to the Play button and hide it
+	$('#play'+id).addClass('current-play');
+	$('.current-play').hide();
+	
+	// Get the current song name and url
+	var trackUrl = $('#song-url'+id).attr('href');
+	var songName, shortSongName = songName = $('#song-name'+id).html();
+	
+	if (songName.length > 30) {
+		var shortSongName = $('#song-name'+id).html().substr(0, 30)+'...';
+	}
+	
+	$('#sw-song-name').html($('<a>', {text: shortSongName, href: trackUrl, title: songName, rel: 'loadpage'}));
+	
+	// Show the time holder when a song starts playing
+	$('.jp-audio .jp-time-holder').show();
+	
+	// Destroy the player if any is active
+	$("#sound-player").jPlayer("destroy");
+	
+	// Add the active player to the current song
+	$("#song-controls"+id).html($("#seek-bar-song").html());
+	
+	// Add the active player class to the current song
+	$("#song-controls"+id).addClass('current-seek');
+	
+	// Set the play/pause button position (this is needed for mobile view in order for the play/pause button to be at the same height with the initial play button)
+	$('#track'+id+' .jp-play , #track'+id+' .jp-pause').css({ 'margin-top' : '-' + $('.song-top', '#track'+id).outerHeight() + 'px' });
+	
+	// Get the track extension
+	var ext = getExtension(song);
+	
+	// Determine prev next buttons
+	prevnext();
+	$("#sound-player").jPlayer({
+		ready: function (event) {
+			if(ext == 'mp3') {
+				$(this).jPlayer("setMedia", {
+					mp3: '{$url}/uploads/tracks/'+song
+				}).jPlayer("play");
+			} else if(ext == 'm4a') {
+				$(this).jPlayer("setMedia", {
+					m4a: '{$url}/uploads/tracks/'+song				
+				}).jPlayer("play");
+			}
+		},
+		cssSelectorAncestor: '#sound-container',
+		ended: function () {
+			$.ajax({
+				type: "POST",
+				url: "{$url}/requests/add_view.php",
+				data: "id="+id, 
+				cache: false,
+				success: function(html) {
+				
+				}
+			});
+			
+			// If repeat is not turned on, move to the next song
+			if($('#repeat-song').html() == 0) {
+				$('.current-seek').html($('#sound_ghost_player').html());
+				$('.current-play').show();
+				nextSong(id);
+			}
+		},
+		/*error: function() {
+			// If the track fails to play for whatever reasons, hide it
+			$('#track'+id).fadeOut();
+			nextSong(id);
+		},*/
+		errorAlerts: true,
+		swfPath: "{$url}/{$theme_url}/js",
+		supplied: ext,
+		wmode: "window",
+		volume: getCookie("volume"),
+		smoothPlayBar: true,
+		solution: "html, flash",
+		keyEnabled: true
+	});
+};
+</script>
+</head>
+<body>
+<div id="loading-bar"><dd></dd><dt></dt></div>
+<div class="topbar">
+	<div class="header">
+		<a href="{$url_menu}" rel="loadpage"><div class="logo"></div></a>
+		{$menu_buttons}
+		<div class="search-input"><input type="text" id="search" placeholder="{$lng->search_for_people}" autocomplete="off"></div>
+
+		<div id="sound-player" class="jp-jplayer"></div>
+		<div id="sound-container" class="jp-audio top-player">
+			<div class="jp-type-single">
+				<div class="jp-gui jp-interface">
+					<ul class="jp-controls">
+						<li><a onclick="prevnext(1)" id="prev-button" class="prev-button" title="{$lng->prev_track}"></a></li>
+						<li><a href="javascript:;" class="jp-play" tabindex="1" title="{$lng->play}">play</a></li>
+						<li><a href="javascript:;" class="jp-pause" tabindex="1" title="{$lng->pause}">pause</a></li>
+						<li><a onclick="prevnext(2)" id="next-button" class="next-button" title="{$lng->next_track}"></a></li>
+						<li><a href="javascript:;" class="jp-mute" tabindex="1" title="{$lng->mute}">mute</a></li>
+						<li><a href="javascript:;" class="jp-unmute" tabindex="1" title="{$lng->unmute}">unmute</a></li>
+					</ul>
+					<ul class="jp-toggles">
+							<li><a href="javascript:;" class="jp-repeat" tabindex="1" title="{$lng->repeat}" onclick="repeatSong(1)">repeat</a></li>
+							<li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="{$lng->repeat_off}" onclick="repeatSong(0)">repeat off</a></li>
+							<div style="display: none;" id="repeat-song">0</div>
+						</ul>
+					<div class="topbar-song-name" id="sw-song-name">
+						
+					</div>
+					<div class="jp-progress">
+						<div class="jp-seek-bar">
+							<div class="jp-play-bar"></div>
+						</div>
+					</div>
+					<div class="jp-volume-bar" onclick="playerVolume()" title="{$lng->volume}">
+						<div class="jp-volume-bar-value"></div>
+					</div>
+					<div class="jp-time-holder">
+						<div class="jp-current-time"></div>
+						<div class="jp-duration"></div>
+					</div>
+				</div>
+				<div class="jp-no-solution"></div>
+			</div>
+		</div>
+		{$menu}
+	</div>
+	<div class="search-container"></div>
+	<div class="notification-container">
+		<div class="notification-content">
+			<div class="notification-inner">
+				<span id="global_page_url"><a href="{$url}/index.php?a=notifications" rel="loadpage">{$lng->view_all_notifications}</a></span>
+				<span id="chat_page_url"><a href="{$url}/index.php?a=notifications&filter=chats" rel="loadpage">{$lng->view_chat_notifications}</a></span>
+				<a onclick="showNotification('close')" title="{$lng->close_notifications}"><div class="close_btn"></div></a>
+			</div>
+			<div id="notifications-content"></div>
+			<div class="notification-row"><div class="notification-padding"><a href="{$url}/index.php?a=settings&b=notifications" rel="loadpage">{$lng->notifications_settings}</a></div></div>
+		</div>
+	</div>
+</div>
+<div class="topbar_margin"></div>
+<div id="content">
+	{$content}
+</div>
+<div id="connect" style="display: none;">
+	<div class="modal-container">
+		<div class="modal-title" id="share-title">
+			<div class="modal-menu-container">
+				<div class="modal-menu-item modal-menu-item-active" id="tab-login">{$lng->login}</div>
+				<div class="modal-menu-item" id="tab-register">{$lng->register}</div>
+				<div class="modal-loading"></div>
+			</div>
+		</div>
+		<div class="divider"></div>
+		<div class="tab-login">
+			<div id="login-message"></div>
+			<div class="modal-inner">
+				<form id="login-form" method="post">
+				<div class="modal-input modal-connect">	
+					<input type="text" id="short" name="username" placeholder="{$lng->username_or_email}">
+					<input type="password" id="short" name="password" placeholder="{$lng->password}">
+				</div>
+				<div class="modal-checkbox"><input type="checkbox" name="remember" value="1" id="remember-me"><label for="remember-me">{$lng->remember_me}</label></div>
+				<input type="submit" style="display: none;"><!-- submit button used to enable the enter key -->
+				</form>
+				<div class="forgot-password"><a href="{$url}/index.php?a=recover" rel="loadpage">{$lng->forgot_password}</a></div>
+			</div>
+			<div class="divider"></div>
+			<div class="modal-menu">
+				<div class="modal-btn modal-btn-active"><a id="login-button" onclick="connect(1)">{$lng->login}</a></div>{$fblogin}
+			</div>
+		</div>
+		<div class="tab-register">
+			<div id="register-message"></div>
+			<div class="modal-inner">
+				<div class="modal-input modal-connect">
+					<form id="register-form" method="post">
+					<input type="text" id="short" name="username" placeholder="{$lng->username}">
+					<input type="password" id="short" name="password" placeholder="{$lng->password}">
+					<input type="text" id="short" name="email" placeholder="{$lng->email}">
+					{$captcha}
+					<input type="submit" style="display: none;"><!-- submit button used to enable the enter key -->
+					</form>
+				</div>
+			</div>
+			<div class="divider"></div>
+			<div class="modal-menu">
+				<div class="modal-btn modal-btn-active"><a id="register-button" onclick="connect(0)">{$lng->register}</a></div>{$fblogin}
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal-background"></div>
+<div class="row-body">
+	<div class="footer">
+		<div class="footer-container">
+			<div class="footer-links">
+				<a href="{$url}/index.php?a=page&b=tos" rel="loadpage">{$lng->terms_of_use}</a> - 
+				<a href="{$url}/index.php?a=page&b=privacy" rel="loadpage">{$lng->privacy_policy}</a> - 
+				<a href="{$url}/index.php?a=page&b=disclaimer" rel="loadpage">{$lng->disclaimer}</a> - 
+				<a href="{$url}/index.php?a=page&b=api" rel="loadpage">{$lng->developers}</a> - 
+				<a href="{$url}/index.php?a=page&b=contact" rel="loadpage">{$lng->contact}</a> - 
+				<a href="{$url}/index.php?a=page&b=about" rel="loadpage">{$lng->about}</a> - 
+				<a href="{$url}/index.php?a=admin" rel="loadpage">{$lng->title_admin}</a>
+			</div>
+			<div class="footer-languages">
+				{$lng->language}: {$language}
+			</div>
+			<div class="footer-languages">
+				Copyright &copy; {$year} {$site_title}. {$lng->all_rights_reserved}. {$powered_by}
+			</div>
+		</div>
+	</div>
+</div>
+<div id="seek-bar-song" style="display: none;">
+	<div id="sound-container" class="jp-audio">
+		<div class="jp-type-single">
+				<div class="jp-gui jp-interface">
+					<a href="javascript:;" class="jp-play">&nbsp;</a><a href="javascript:;" class="jp-pause">&nbsp;</a>
+					<div class="jp-progress">
+						<div class="jp-seek-bar">
+							<div class="jp-play-bar"></div>
+						</div>
+					</div>
+					<div class="jp-time-holder">
+						<div class="jp-current-time"></div>
+						<div class="jp-duration"></div>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="sound_ghost_player" style="display: none;"><div class="jp-audio"><div class="jp-type-single"><div class="jp-gui jp-interface"><div class="jp-progress"><div class="jp-seek-bar"><div class="jp-play-bar"></div></div></div></div></div></div></div>
+</body>
+</html>
